@@ -1,0 +1,18 @@
+.review-container {
+    display: flex;
+    justify-content: space-around;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+@media screen and (max-width: 700px) {
+    .review-container {
+        flex-direction: column;
+    }
+    .review-cards{
+        width: 100%;
+    }
+    .review-summary{
+        width: 100%;
+    }
+}

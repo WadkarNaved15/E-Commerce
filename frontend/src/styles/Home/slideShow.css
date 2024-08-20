@@ -1,0 +1,11 @@
+.slideShow{
+    display:flex ;
+    justify-content: center;
+    align-items: center;
+    margin-top: 4rem;
+    >img{
+    height: 25rem;
+    width: 90%;
+    object-fit: contain/cover;
+    }
+}

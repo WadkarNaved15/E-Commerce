@@ -1,0 +1,18 @@
+.image-with-hover{
+    height: fit-content;
+    position: sticky;
+    top: 5rem;
+    display: flex;
+    gap: 5rem;
+
+}
+
+.main-product-image{
+    height: 25rem;
+    width: 25rem;
+    object-fit: contain;
+    border-radius: 5px;
+}
+
+
+

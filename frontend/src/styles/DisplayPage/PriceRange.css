@@ -1,0 +1,25 @@
+.price-range-slider {
+    width: 80%;
+    margin: 20px auto;
+    text-align: center;
+}
+
+.price-range-slider label {
+    font-size: 18px;
+    margin-right: 10px;
+}
+
+
+/* PriceRange.css */
+
+/* Customize track color */
+.rc-slider-track {
+    background-color: #007bff; /* Example color: blue */
+  }
+  
+  /* Customize handle color */
+  .rc-slider-handle {
+    border-color: #007bff; /* Example color: blue */
+    background-color: #ffffff; /* Example color: white */
+  }
+  

@@ -1,0 +1,32 @@
+/* EmptyCartPage.css */
+.empty-cart-page {
+    width: 100dvw;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    overflow: hidden;
+  }
+  
+  .empty-cart-page h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+  }
+  
+  .empty-cart-page button {
+    width: fit-content;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 1rem;
+  }
+  
+  .empty-cart-page button:hover {
+    background-color: #0056b3;
+  }
+  

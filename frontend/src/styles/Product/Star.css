@@ -1,0 +1,9 @@
+.star-rating {
+    display: flex;
+    align-items: center;
+  }
+  
+  .star-icon {
+    color: orange;
+    margin-right: 0.1rem;
+  }

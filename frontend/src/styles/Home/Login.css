@@ -1,0 +1,148 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100dvh;
+  width: 100dvw;
+}
+
+.login-form-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  height: 80%;
+  width: 100%;
+  max-width: 400px;
+}
+.login-image-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80%;
+    width: 50%;
+    max-width: 400px;
+    background-color: #7f7f7f;
+}
+.login-image{
+    height: 20rem;
+    width: 100%;
+    background: url("public/assets/images/loginImage.png") no-repeat center center;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.input-group {
+  margin-bottom: 1rem;
+}
+
+input[type="tel"],
+input[type="text"] {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.otp-input-group {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.otp-input-group input {
+  width: 48px;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-align: center;
+}
+
+button {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+.toggle-container {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.toggle-container button {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.toggle-container button:hover {
+  color: #0056b3;
+}
+
+@media screen and (max-width: 850px) {
+  .login-form-container{
+    width: 15rem;
+    >form{
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+       > button{
+      width: fit-content;
+    }
+  }
+  }
+
+  .login-image-container{
+    width: 15rem;
+  }
+  .otp-input-group{
+    gap: 0.25rem;
+  }
+  .otp-input-group input{
+    width: 2rem;
+    height: 2rem;
+    padding: 0.25rem;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .container{
+    background-color: aliceblue;
+  }
+  .login-form-container{
+    width: 100%;
+    height: fit-content;
+  }
+  .login-image-container{
+    display: none;
+  }
+
+}
+
+@media screen and (max-width: 450px) {
+  .login-form-container{
+    width: 15rem;
+
+  }
+
+}
+
+  

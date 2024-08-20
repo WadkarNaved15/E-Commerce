@@ -1,0 +1,301 @@
+.order-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+  }
+  
+  .order-summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
+  .order-id {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .order-id h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+  
+  .badge {
+    text-align: center;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.875rem;
+  }
+  
+  .badge-Ordered {
+    background-color: #ffeb3b; /* Yellow for Ordered */
+    color: #000; /* Black text */
+  }
+  
+  .badge-Shipped {
+    background-color: #2196f3; /* Blue for Shipped */
+  }
+  
+  .badge-Delivered {
+    background-color: #4caf50; /* Green for Delivered */
+  }
+  
+  .badge-Cancelled {
+    background-color: #ff3223; /* Red for Cancelled */
+  }
+  
+  
+  .order-timeline {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+  }
+  
+  .timeline-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.875rem;
+    color: #6c757d;
+  }
+  
+  .icon {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .card {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .card-header {
+    margin-bottom: 15px;
+  }
+  
+  .card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .address-name{
+    font-weight: bold;
+  }
+  
+  .order-items {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .items-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  
+  th, td {
+    padding: 8px;
+    text-align: center;
+    border-bottom: 1px solid #dee2e6;
+  }
+  
+  .order-summary-details {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .summary-header {
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  
+  .summary-item {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .summary-total {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    font-size: 1.125rem;
+  }
+  
+  .address-payment-section {
+    display: flex;
+    gap: 20px;
+  }
+
+  .item-name{
+    width: 30%;
+    cursor: pointer;
+  }
+  
+  .payment-method {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  
+  .icon-placeholder {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    background-color: #e9ecef;
+    border-radius: 50%;
+  }
+
+  .status-with-cancel{
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .cancel-order-button {
+    width: fit-content;
+    color: black; 
+    background-color: white;
+    border: none;
+    outline: none;
+    height: fit-content;
+    font-size: 1rem;
+    padding: 0;
+    cursor: pointer;
+    display: inline-block; 
+    margin: 0;
+  }
+  
+  .cancel-order-button:hover {
+    color: #e60000;
+    background-color: white;
+  }
+  
+  .cancel-order-button:active {
+    color: #cc0000; /* Even darker red when active */
+  }
+  
+
+  /* Modal Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5); 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000; 
+  }
+  
+  /* Modal Content */
+  .modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+  }
+  
+  /* Modal Header */
+  .modal-content h2 {
+    margin-top: 0;
+    font-size: 20px;
+    color: #333;
+  }
+  
+  /* Modal Buttons */
+  .modal-buttons {
+    display: flex;
+    margin-top: 20px;
+  }
+  
+  .modal-confirm-button,
+  .modal-cancel-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 0 10px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .modal-confirm-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .modal-cancel-button {
+    background-color: #6c757d;
+  }
+  
+  .modal-cancel-button:hover {
+    background-color: #5a6268;
+  }
+  
+  
+  /* Media Queries for Responsiveness */
+  @media (max-width: 1024px) {
+    .order-timeline {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .order-timeline {
+      grid-template-columns: repeat(1, 1fr);
+    }
+  
+    .address-payment-section {
+      flex-direction: column;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .order-summary-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  
+    .order-id h1 {
+      font-size: 1.25rem;
+    }
+  
+    .badge {
+      font-size: 0.75rem;
+    }
+  
+    .card {
+      padding: 15px;
+    }
+  
+    .summary-total {
+      font-size: 1rem;
+    }
+  
+    th, td {
+      font-size: 0.875rem;
+    }
+  }
+  

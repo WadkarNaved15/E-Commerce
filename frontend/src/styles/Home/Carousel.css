@@ -1,0 +1,71 @@
+/* src/styles/Home/Carousel.css */
+
+.carousel-container {
+    width: 100%;  /* Adjust as needed */
+    height: 700px; /* Fixed height */
+    position: relative; /* For positioning the legend */
+}
+
+/* Swiper container and slide settings */
+.swiper-slide {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%; /* Full height of the container */
+}
+/*  */
+.swiper-slide > img {
+    width: auto; /* Maintain image width */
+    height: 100%; /* Fit image height to container height */
+    object-fit: contain; /* Cover the container while maintaining aspect ratio */
+}
+
+/* Legend styles */
+.legend {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+    border-radius: 5px;
+}
+
+/* Navigation arrows */
+.swiper-button-next,
+.swiper-button-prev {
+    color: #656565; /* Change arrow color */
+    border-radius: 50%; /* Optional: Make arrows round */
+    width: 50px; /* Optional: Adjust size */
+    height: 50px; /* Optional: Adjust size */
+}
+
+.swiper-button-next::after,
+.swiper-button-prev::after {
+    font-size: 50px; /* Optional: Adjust arrow size */
+}
+
+/* Pagination bullets */
+.swiper-pagination-bullet {
+    background: #8a8989; /* Change bullet color */
+}
+
+.swiper-pagination-bullet-active {
+    background: #2e2e2e; /* Change active bullet color */
+}
+
+@media screen and (max-width: 600px) {
+    .carousel-container{
+        height: 400px;
+    }
+    .slide{
+        height: 400px;
+        width: 100%;
+    }
+    .slide > img{
+        height: 400px;
+        width: 100%;
+    }
+}

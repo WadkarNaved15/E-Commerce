@@ -1,0 +1,202 @@
+.header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: #2a55e5;
+    height: 2rem;
+    width: 100%;
+    >img {
+        height: 4rem;
+        width: 4rem;
+    }
+
+    .logo{
+        margin-top: 0.5rem;
+        height: 2rem;
+        width: 4rem;
+    }
+    >form {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        >div {
+            display: flex;
+            align-items: center;
+        >input{
+            padding: 0.5rem;
+            height: 2rem;
+            width: 30rem;
+            border-radius: 0;
+            border-top-left-radius: 5px;
+            border-bottom-left-radius: 5px;
+            border: none;
+            outline: none;
+            margin: 0;
+        }
+    }
+    }
+}
+
+.search{
+    height: 2rem;
+    width: 2rem;
+    background-color: white;
+    border: 1px solid white;
+    border-radius: 0;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding:0;
+    &:hover{
+        background-color: #f0f0f0;
+    }
+}
+
+.header-right{
+    display: flex;
+    margin-top: 0.5rem;
+    justify-content: center;
+    gap: 1rem;
+    >button{
+        background-color: white;
+        border: none;
+        outline: none;
+        border-radius: 5px;
+        padding: 0.5rem;
+        cursor: pointer;
+    }
+}
+.new-search-form {
+    display: none;
+}
+.new-autocomplete-dropdown{
+    display: none;
+}
+.autocomplete-dropdown {
+    position: absolute;
+    top: 3rem;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    width: 30rem;
+    border-radius: 0;
+    z-index: 1000;
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+.autocomplete-item {
+    padding: 8px;
+    height: 3rem;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.autocomplete-item:hover  {
+    background-color: #f0f0f0;
+}
+
+.selected {
+    background-color: #f0f0f0;
+}
+
+.icon{
+    font-size: 30px;
+}
+
+@media screen and (max-width: 1024px) {
+    .header{
+        >form{
+            >div{
+            >input{
+                width: 20rem;
+            }
+        }
+        }
+    } 
+    .autocomplete-dropdown{
+        width: 20rem;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .header{
+        padding: 1rem;
+        >form{
+            display: none;
+            >input{
+                width: 15rem;
+            }
+        }
+    }  
+    .new-search-form{
+        padding: 1rem;
+        background-color: #2a55e5;
+        display: block;
+        gap: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        >input{
+            padding: 0.5rem;
+            height: 2rem;
+            padding: 0.5rem;
+            height: 2rem;
+            width: 80%;
+            border-radius: 0 !important;
+            border-top-left-radius: 5px !important;
+            border-bottom-left-radius: 5px !important;
+            border: none;
+            outline: none;
+            margin: 0 !important;
+        }
+    } 
+    .search{
+        height: 2rem;
+        width: 2rem;
+        background-color: white;
+        border: 1px solid white;
+        border-top-right-radius: 5px;
+        border-bottom-right-radius: 5px;
+        
+   }
+   .new-autocomplete-dropdown{
+    display: block !important;
+    width: 80%;
+    position: absolute;
+    top: 7rem;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    &::-webkit-scrollbar {
+        display: none;
+    }
+   }
+   .icon{
+    font-size: 25px;
+   }
+}
+
+@media screen and (max-width: 450px) {
+    .icon{
+        font-size: 20px;
+    }
+}

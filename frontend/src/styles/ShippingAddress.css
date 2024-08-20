@@ -1,0 +1,106 @@
+.shipping-container{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 1rem;
+  >.manage-address{
+    padding: 1rem;
+    font-weight: bold;
+    width: 100%;
+    >.add-address-button{
+      margin: 1rem 0;
+      border: 1px solid rgba(0, 0, 0, 0.359);
+      cursor: pointer;
+      width: 100%;
+      >button{
+        color: #0071ff;
+        background-color: white;
+        margin: 0;
+        display: flex;
+        gap: 1rem;
+      }
+    }
+  }
+
+  >.shipping-form-container{
+    padding: 1rem;
+    background-color: #f5faff;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    >p{
+      text-transform: uppercase;
+      font-weight: 600;
+      color: #0071ff;
+    }
+    > form{
+      width: 100%;
+      height: fit-content;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      column-gap: 4rem;
+      > div > input , > div > select {
+        width: 100%;
+        padding: 1rem;
+        border: 1px solid rgba(0, 0, 0, 0.359);
+        outline: none;
+        border-radius: 5px;
+      }
+      
+      >.submit-button{
+        background-color: #007bff;
+        color: white;
+        cursor: pointer;
+        border: none;
+        border-radius: 5px;
+    }
+    >.cancel-button{
+      background-color: #f5faff;
+      color: #0071ff;
+      cursor: pointer;
+      width: 100%;
+      text-align: start;
+    }
+  }
+  }
+}
+#address {
+  grid-column-start: 1 ;
+  grid-column-end: 3;
+  > input {
+    height: 5rem;
+
+  }
+}
+
+.location-button{
+  grid-column-start: 1 ;
+  grid-column-end: 3;
+  width: 20rem;
+}
+
+#addressType {
+  grid-column-start: 1 ;
+  grid-column-end: 3;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  > label {
+    margin-left: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    > input {
+      margin-right: 0.5rem;
+      cursor: pointer;
+    }
+  }
+  
+}
+
+
+

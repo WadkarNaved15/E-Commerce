@@ -1,0 +1,70 @@
+.review-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 16px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+    background-color: #fff;
+}
+
+.review-card:hover {
+    transform: translateY(-4px);
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.review-header h3 {
+    margin: 0;
+    font-size: 1.2em;
+}
+
+.review-rating {
+    display: flex;
+}
+
+.review-rating svg {
+    margin-right: 4px;
+}
+
+.review-card p {
+    margin: 0;
+    font-size: 1em;
+    color: #333;
+}
+
+.review-images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.review-images img {
+    max-width: 100px;
+    max-height: 100px;
+    object-fit: contain;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    padding: 2px;
+}
+
+.delete-btn {
+    margin: 0;
+    color: #f44336;
+    background-color: #fff;
+    border: none;
+    width: fit-content;
+    padding: 0;
+    font-size: 14px;
+    cursor: pointer;
+    &:hover {
+        text-decoration: underline;
+        background-color: #fff;
+    }
+}

@@ -1,0 +1,39 @@
+.category-card{
+    height: 11rem;
+    width: 11rem;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0.25rem;
+    background-color: #f7f7f7;
+    border-radius: 5px;
+    >h4{
+        font-family: monospace;
+        font-size: 1rem;
+        text-transform: capitalize;
+    }
+}
+
+.category-img{
+    padding: 0.25rem;
+    height: 8rem;
+    width: 8rem;
+    background-color: #cecece;
+    border-radius: 5px;
+    >img{
+        height: 100%;
+        width: 100%;
+        object-fit: cover / contain;
+        border-radius: 5px;
+    }
+}
+
+
+@media screen and (max-width: 350px) {
+    .category-card{
+        width: 9rem;
+        height: 9rem;
+    }
+}

@@ -1,0 +1,84 @@
+.address-display-container {
+  margin: 20px;
+  width: 90%;
+}
+
+.address-card {
+  border: 1px solid #ccc;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative; /* Required for absolute positioning of the dropdown */
+}
+
+.address-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.addressType {
+  background-color: #f0f0f0;
+  padding: 0.25rem;
+  font-size: small;
+  font-weight: 600;
+  color: #212121;
+  border-radius: 5px;
+  margin-bottom: 0.25rem;
+}
+
+.options {
+  display: flex;
+  justify-content: flex-end;
+  position: relative;
+  height: fit-content;
+  &:hover{
+    cursor: pointer;
+  }
+}
+
+.options .dropdown-menu {
+  display: none; 
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  width: 120px; 
+}
+
+.options:hover .dropdown-menu {
+  display: block; 
+}
+
+.dropdown-menu div {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.dropdown-menu div:hover {
+  background-color: #f0f0f0; /* Highlight on hover */
+}
+
+.user-details {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.user-details p {
+  font-weight: 600;
+}
+
+.address-details {
+  display: flex;
+  width: 80%;
+}
+
+.pincode {
+  font-weight: 600;
+}

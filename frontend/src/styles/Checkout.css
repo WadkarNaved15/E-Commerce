@@ -1,0 +1,161 @@
+.checkout-page{
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    width: 100dvw;
+    height: 100dvh;
+    background-color: #f1f3f6;
+    overflow: auto;
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+.checkout-left{
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 70%;
+    > div{
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        background-color: white;
+        padding: 1rem;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+}
+
+.step-heading{
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    > .step-index  {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2rem;
+        height: 2rem;
+        color: #2874f0;
+        background-color: #f0f0f0;
+        > div {
+            height: 2rem;
+            width: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f0f0;
+            color: #2874f0;
+        }
+    }
+    > div > h3 {
+        display: flex;
+        gap: 0.5rem;
+        text-transform: uppercase;
+        font-size: 1rem;
+        letter-spacing: 1px;
+        font-weight: 600;
+    }
+}
+.checkout-right{
+    width: 25%;
+}
+
+.change-button{
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    color: #2874f0;
+    background-color: white ;
+    border: 1px solid #2874f0;
+    border-radius: 0;
+    padding: 0.5rem 2rem;
+    width: fit-content;
+    margin: 0;
+    &:hover{
+        color: #2874f0;
+        background-color: white;
+    }
+}
+.checkout-button{
+    &:disabled{
+        background-color:gray;
+        color: white;
+    }
+}
+
+.step-values{
+    width: 80%;
+    
+}
+
+
+.address-values{
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    > div > label {
+        display: flex;
+        gap: 0.5rem;
+
+    }
+}
+.login-buttons{
+    display: flex;
+    width: fit-content;
+    gap: 1rem;
+    > button{
+        width: 10rem;
+        padding: 0.5rem;
+        border: none;
+        outline: none;
+        border-radius: 5px;
+    }
+
+    > button:nth-child(1){
+        background-color: #2874f0;
+        color: white;
+    }
+
+    > button:nth-child(2){
+        background-color: white;
+        color: #2874f0;
+    }
+}
+
+.option-razorpay{
+    >label{
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+         >img{
+        height: 6rem;
+        width: 6rem;
+        object-fit: contain;
+    }
+}
+}
+
+@media screen and (max-width: 1024px) {
+    .checkout-page{
+        flex-direction: column;
+    }
+    .checkout-left{
+        width: 90%;
+    }
+    .checkout-right{
+        width: 90%;
+    }
+}
+
+@media screen and (max-width: 540px) {
+.step-heading{
+        gap: 0.5rem ;
+    }
+
+    .login-buttons{
+        flex-direction: column;
+    }
+}

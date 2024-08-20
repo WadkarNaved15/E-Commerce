@@ -1,0 +1,59 @@
+.loader-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%; /* Full viewport height */
+    width: 100%;  /* Full viewport width */
+  }
+  
+  .loader {
+    border: 0.5rem solid #f3f3f3; /* Light grey */
+    border-top: 0.5rem solid #6e6e6e; /* Blue */
+    border-radius: 50%;
+    width: 5rem;
+    height: 5rem;
+    animation: spin 2s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+
+
+
+  .skeleton-loader-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+    padding: 1rem;
+    flex-direction: column;
+    gap: 0.5rem; /* Space between each loader item */
+  }
+  
+  .skeleton-loader {
+    background: #e0e0e0; /* Light grey color for the skeleton */
+    border-radius: 4px; /* Rounded corners for a softer look */
+    width: 90%;
+    height: 2rem; /* Height of the skeleton loader */
+    animation: pulse 1.5s infinite ease-in-out; /* Pulse animation */
+  }
+  
+  
+  
+  /* Animation for the skeleton loader */
+  @keyframes pulse {
+    0% {
+      background-color: #e0e0e0;
+    }
+    50% {
+      background-color: #c0c0c0;
+    }
+    100% {
+      background-color: #e0e0e0;
+    }
+  }
+  
+  
