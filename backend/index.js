@@ -32,7 +32,7 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 app.use('/uploads', express.static('uploads'));
 app.use(cors({
-    origin: [process.env.FRONTEND,"http://192.168.0.104:5173","http://192.168.0.106:5173 "],
+    origin: [process.env.FRONTEND],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type'],
     credentials: true
