@@ -43,10 +43,12 @@ const ProductFilterPage = () => {
          });
          const decryptedResponse = decryptData(encryptedResponse.data.data);
          const parsedData = JSON.parse(decryptedResponse);
+
         const { products , total } = parsedData;
+        const newProducts = products.map(product => product.product);
         setTotalPages(Math.ceil(total / 20));
-        setProducts(products);
-        setFilteredProducts(products);
+        setProducts(newProducts);
+        setFilteredProducts(newProducts);
 
         // Fetch categories
         const encryptedCategoriesResponse = await axios.get(`${server}/category/simple`);
@@ -55,19 +57,21 @@ const ProductFilterPage = () => {
         const allCategories = parsedCategories;
 
         // Extract unique categories and subcategories from filtered products
-        const uniqueCategories = [...new Set(products.map(product => product.category))];
-        const uniqueSubcategories = [...new Set(products.map(product => product.subcategory))];
+        const uniqueCategories = [...new Set(newProducts.map(product => product.category))];
+        const uniqueSubcategories = [...new Set(newProducts.map(product => product.subcategory))];
 
+        console.log(uniqueCategories);
+        console.log(uniqueCategories.includes("drones"));
         // Filter categories based on unique categories and subcategories
         const filteredCategories = allCategories.filter(category => {
           const hasRelevantSubcategories = category.subcategories && category.subcategories.some(sub => uniqueSubcategories.includes(sub.name));
           return uniqueCategories.includes(category.name) || hasRelevantSubcategories;
         });
-
-        setCategories(filteredCategories);
+        console.log(filteredCategories);
+        setCategories(filteredCategories );
 
         // Extract unique brands from filtered products
-        const uniqueBrands = [...new Set(products.map(product => product.brand))];
+        const uniqueBrands = [...new Set(newProducts.map(product => product.brand))];
         setBrands(uniqueBrands);
 
 
@@ -127,6 +131,7 @@ const ProductFilterPage = () => {
 
     setFilteredProducts(filtered);
   };
+
 
   const handleCategoryChange = (e) => {
     const value = e.target.value;

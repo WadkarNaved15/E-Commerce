@@ -1,7 +1,10 @@
 // Connect to MongoDB
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 
-const uri = "mongodb+srv://navedwadkar:9321869880@instagram.cbzhjlt.mongodb.net/?retryWrites=true&w=majority&appName=Instagram";
+dotenv.config();
+
+const uri = process.env.MONGODB_URI;
 const dbName = 'Ecommerce'; 
 
 if (!uri) {

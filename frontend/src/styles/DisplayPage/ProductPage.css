@@ -146,8 +146,8 @@
 
     .filter-toggle {
         display: block;
-        position: sticky;
-        top: 10px;
+        position: fixed;
+        top: 6rem;
         left: 10px;
         width: fit-content;
         background-color: #fff !important;

@@ -4,20 +4,14 @@ import { FaTrash } from "react-icons/fa";
 import AdminSidebar from "../../components/admin/AdminSidebar";
 import TableHOC from "../../components/admin/TableHOC";
 import Pagination from "../../components/Pagination";
+import { encryptData, decryptData } from "../../utils/Encryption";
+import { toast } from "react-hot-toast";
 
 const columns = [
-  // {
-  //   Header: "Avatar",
-  //   accessor: "avatar",
-  // },
   {
     Header: "Name",
-    accessor: (row) => `${row.first_name} ${row.last_name}`
+    accessor: (row) => `${row.first_name} ${row.last_name}`,
   },
-  // {
-  //   Header: "Gender",
-  //   accessor: "gender",
-  // },
   {
     Header: "Mobile",
     accessor: "mobile",
@@ -32,505 +26,61 @@ const columns = [
   },
 ];
 
-// const arr = [
-//   {
-//     avatar: (
-//       <img
-//         style={{
-//           borderRadius: "50%",
-//         }}
-//         src={img}
-//         alt="Avatar"
-//       />
-//     ),
-//     name: "Emily Palmer",
-//     email: "emily.palmer@example.com",
-//     gender: "female",
-//     role: "user",
-//     action: (
-//       <button>
-//         <FaTrash />
-//       </button>
-//     ),
-//   },
-//   {
-//     avatar: (
-//       <img
-//         style={{
-//           borderRadius: "50%",
-//         }}
-//         src={img2}
-//         alt="Avatar"
-//       />
-//     ),
-//     name: "May Scoot",
-//     email: "aunt.may@example.com",
-//     gender: "female",
-//     role: "user",
-//     action: (
-//       <button>
-//         <FaTrash />
-//       </button>
-//     ),
-//   },{
-//     avatar: (
-//       <img
-//         style={{
-//           borderRadius: "50%",
-//         }}
-//         src={img2}
-//         alt="Avatar"
-//       />
-//     ),
-//     name: "May Scoot",
-//     email: "aunt.may@example.com",
-//     gender: "female",
-//     role: "user",
-//     action: (
-//       <button>
-//         <FaTrash />
-//       </button>
-//     ),
-//   },{
-//     avatar: (
-//       <img
-//         style={{
-//           borderRadius: "50%",
-//         }}
-//         src={img2}
-//         alt="Avatar"
-//       />
-//     ),
-//     name: "May Scoot",
-//     email: "aunt.may@example.com",
-//     gender: "female",
-//     role: "user",
-//     action: (
-//       <button>
-//         <FaTrash />
-//       </button>
-//     ),
-//   },{
-//     avatar: (
-//       <img
-//         style={{
-//           borderRadius: "50%",
-//         }}
-//         src={img2}
-//         alt="Avatar"
-//       />
-//     ),
-//     name: "May Scoot",
-//     email: "aunt.may@example.com",
-//     gender: "female",
-//     role: "user",
-//     action: (
-//       <button>
-//         <FaTrash />
-//       </button>
-//     ),
-//   },{
-//     avatar: (
-//       <img
-//         style={{
-//           borderRadius: "50%",
-//         }}
-//         src={img2}
-//         alt="Avatar"
-//       />
-//     ),
-//     name: "May Scoot",
-//     email: "aunt.may@example.com",
-//     gender: "female",
-//     role: "user",
-//     action: (
-//       <button>
-//         <FaTrash />
-//       </button>
-//     ),
-//   },{
-//     avatar: (
-//       <img
-//         style={{
-//           borderRadius: "50%",
-//         }}
-//         src={img2}
-//         alt="Avatar"
-//       />
-//     ),
-//     name: "May Scoot",
-//     email: "aunt.may@example.com",
-//     gender: "female",
-//     role: "user",
-//     action: (
-//       <button>
-//         <FaTrash />
-//       </button>
-//     ),
-//   },{
-//     avatar: (
-//       <img
-//         style={{
-//           borderRadius: "50%",
-//         }}
-//         src={img2}
-//         alt="Avatar"
-//       />
-//     ),
-//     name: "May Scoot",
-//     email: "aunt.may@example.com",
-//     gender: "female",
-//     role: "user",
-//     action: (
-//       <button>
-//         <FaTrash />
-//       </button>
-//     ),
-//   },{
-//     avatar: (
-//       <img
-//         style={{
-//           borderRadius: "50%",
-//         }}
-//         src={img2}
-//         alt="Avatar"
-//       />
-//     ),
-//     name: "May Scoot",
-//     email: "aunt.may@example.com",
-//     gender: "female",
-//     role: "user",
-//     action: (
-//       <button>
-//         <FaTrash />
-//       </button>
-//     ),
-//   },{
-//     avatar: (
-//       <img
-//         style={{
-//           borderRadius: "50%",
-//         }}
-//         src={img2}
-//         alt="Avatar"
-//       />
-//     ),
-//     name: "May Scoot",
-//     email: "aunt.may@example.com",
-//     gender: "female",
-//     role: "user",
-//     action: (
-//       <button>
-//         <FaTrash />
-//       </button>
-//     ),
-//   },{
-//     avatar: (
-//       <img
-//         style={{
-//           borderRadius: "50%",
-//         }}
-//         src={img2}
-//         alt="Avatar"
-//       />
-//     ),
-//     name: "May Scoot",
-//     email: "aunt.may@example.com",
-//     gender: "female",
-//     role: "user",
-//     action: (
-//       <button>
-//         <FaTrash />
-//       </button>
-//     ),
-//   },{
-//     avatar: (
-//       <img
-//         style={{
-//           borderRadius: "50%",
-//         }}
-//         src={img2}
-//         alt="Avatar"
-//       />
-//     ),
-//     name: "May Scoot",
-//     email: "aunt.may@example.com",
-//     gender: "female",
-//     role: "user",
-//     action: (
-//       <button>
-//         <FaTrash />
-//       </button>
-//     ),
-//   },{
-//     avatar: (
-//       <img
-//         style={{
-//           borderRadius: "50%",
-//         }}
-//         src={img2}
-//         alt="Avatar"
-//       />
-//     ),
-//     name: "May Scoot",
-//     email: "aunt.may@example.com",
-//     gender: "female",
-//     role: "user",
-//     action: (
-//       <button>
-//         <FaTrash />
-//       </button>
-//     ),
-//   },{
-//     avatar: (
-//       <img
-//         style={{
-//           borderRadius: "50%",
-//         }}
-//         src={img2}
-//         alt="Avatar"
-//       />
-//     ),
-//     name: "May Scoot",
-//     email: "aunt.may@example.com",
-//     gender: "female",
-//     role: "user",
-//     action: (
-//       <button>
-//         <FaTrash />
-//       </button>
-//     ),
-//   },{
-//     avatar: (
-//       <img
-//         style={{
-//           borderRadius: "50%",
-//         }}
-//         src={img2}
-//         alt="Avatar"
-//       />
-//     ),
-//     name: "May Scoot",
-//     email: "aunt.may@example.com",
-//     gender: "female",
-//     role: "user",
-//     action: (
-//       <button>
-//         <FaTrash />
-//       </button>
-//     ),
-//   },{
-//     avatar: (
-//       <img
-//         style={{
-//           borderRadius: "50%",
-//         }}
-//         src={img2}
-//         alt="Avatar"
-//       />
-//     ),
-//     name: "May Scoot",
-//     email: "aunt.may@example.com",
-//     gender: "female",
-//     role: "user",
-//     action: (
-//       <button>
-//         <FaTrash />
-//       </button>
-//     ),
-//   },{
-//     avatar: (
-//       <img
-//         style={{
-//           borderRadius: "50%",
-//         }}
-//         src={img2}
-//         alt="Avatar"
-//       />
-//     ),
-//     name: "May Scoot",
-//     email: "aunt.may@example.com",
-//     gender: "female",
-//     role: "user",
-//     action: (
-//       <button>
-//         <FaTrash />
-//       </button>
-//     ),
-//   },{
-//     avatar: (
-//       <img
-//         style={{
-//           borderRadius: "50%",
-//         }}
-//         src={img2}
-//         alt="Avatar"
-//       />
-//     ),
-//     name: "May Scoot",
-//     email: "aunt.may@example.com",
-//     gender: "female",
-//     role: "user",
-//     action: (
-//       <button>
-//         <FaTrash />
-//       </button>
-//     ),
-//   },{
-//     avatar: (
-//       <img
-//         style={{
-//           borderRadius: "50%",
-//         }}
-//         src={img2}
-//         alt="Avatar"
-//       />
-//     ),
-//     name: "May Scoot",
-//     email: "aunt.may@example.com",
-//     gender: "female",
-//     role: "user",
-//     action: (
-//       <button>
-//         <FaTrash />
-//       </button>
-//     ),
-//   },{
-//     avatar: (
-//       <img
-//         style={{
-//           borderRadius: "50%",
-//         }}
-//         src={img2}
-//         alt="Avatar"
-//       />
-//     ),
-//     name: "May Scoot",
-//     email: "aunt.may@example.com",
-//     gender: "female",
-//     role: "user",
-//     action: (
-//       <button>
-//         <FaTrash />
-//       </button>
-//     ),
-//   },{
-//     avatar: (
-//       <img
-//         style={{
-//           borderRadius: "50%",
-//         }}
-//         src={img2}
-//         alt="Avatar"
-//       />
-//     ),
-//     name: "May Scoot",
-//     email: "aunt.may@example.com",
-//     gender: "female",
-//     role: "user",
-//     action: (
-//       <button>
-//         <FaTrash />
-//       </button>
-//     ),
-//   },{
-//     avatar: (
-//       <img
-//         style={{
-//           borderRadius: "50%",
-//         }}
-//         src={img2}
-//         alt="Avatar"
-//       />
-//     ),
-//     name: "May Scoot",
-//     email: "aunt.may@example.com",
-//     gender: "female",
-//     role: "user",
-//     action: (
-//       <button>
-//         <FaTrash />
-//       </button>
-//     ),
-//   },{
-//     avatar: (
-//       <img
-//         style={{
-//           borderRadius: "50%",
-//         }}
-//         src={img2}
-//         alt="Avatar"
-//       />
-//     ),
-//     name: "May Scoot",
-//     email: "aunt.may@example.com",
-//     gender: "female",
-//     role: "user",
-//     action: (
-//       <button>
-//         <FaTrash />
-//       </button>
-//     ),
-//   },{
-//     avatar: (
-//       <img
-//         style={{
-//           borderRadius: "50%",
-//         }}
-//         src={img2}
-//         alt="Avatar"
-//       />
-//     ),
-//     name: "May Scoot",
-//     email: "aunt.may@example.com",
-//     gender: "female",
-//     role: "user",
-//     action: (
-//       <button>
-//         <FaTrash />
-//       </button>
-//     ),
-//   },
-// ];
-
 const Customers = () => {
-  const server = import.meta.env.VITE_SERVER
+  const server = import.meta.env.VITE_SERVER;
   const [rows, setRows] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
-  useEffect(() => {
-    axios
-      .get(`${server}/user/all`)
-      .then((res) => {
-        const {data} = res.data;
-        setRows(data);
-      })
-      .catch((err) => {
-        console.log(err);
+  const fetchCustomers = async () => {
+    try {
+      const encryptedResponse = await axios.post(`${server}/user/all`, {
+        encryptedData: encryptData(JSON.stringify({ page: page + 1, perPage: 10 })),
       });
-  }, []);
 
-  rows.forEach((row) => {
-    row.action = (
-      <button>
-        <FaTrash />
-      </button>
-    );
-  });
+      const { users, total } = JSON.parse(decryptData(encryptedResponse.data.data));
 
+      const updatedRows = users.map((row) => ({
+        ...row,
+        action: (
+          <button onClick={() => handleDelete(row._id)}>
+            <FaTrash />
+          </button>
+        ),
+      }));
 
+      setRows(updatedRows);
+      setTotalPages(Math.ceil(total / 10));
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+      toast.error("Failed to fetch customers");
+    }
+  };
+
+  const handleDelete = async (customerId) => {
+    try {
+      await axios.delete(`${server}/user/${customerId}`);
+      toast.success("Customer deleted successfully");
+      fetchCustomers(); // Refresh the customer list after deletion
+    } catch (error) {
+      console.error("Error deleting customer:", error);
+      toast.error("Failed to delete customer");
+    }
+  };
+
+  useEffect(() => {
+    fetchCustomers();
+  }, [page]); // Fetch customers whenever the page changes
 
   const TableComponent = TableHOC(
     columns,
     rows,
     "dashboard-customer-box",
-    "Customers",
-    rows.length > 6
+    "Customers"
   );
 
   return (
-    <div className="admin-container" > 
+    <div className="admin-container">
       <AdminSidebar className="admin-sidebar" />
       <main>
         <TableComponent />

@@ -2,7 +2,7 @@ import Razorpay from 'razorpay';
 import crypto from 'crypto';
 import Order from '../models/Order.js';
 import User from '../models/User.js';
-import { decryptData , encryptData } from './Encryption.js';
+import { decryptData , encryptData} from './Encryption.js';
 
 const razorpay = new Razorpay({
     key_id:process.env.RAZORPAY_KEY_ID,
@@ -63,10 +63,23 @@ export const createOrder = async (req, res) => {
 };
 
 
-export const getOrders = async (req, res) => {
-    const userId = req.user.id;
-    const orders = await Order.find({ customer: userId }).populate('items.product');
-    res.status(200).json({ success: true, data: orders });
+export const getAllOrders = async (req, res) => {
+    const encryptData = req.body.encryptedData;
+    const { perPage , page } = JSON.parse(decryptData(encryptData));
+  const orders = await Order.find({
+    $or: [
+      { payment_method: { $ne: 'Razorpay' } }, // Include orders where payment_method is not Razorpay
+      { payment_method: 'Razorpay', payment_status: { $ne: 'Pending' } } // Include Razorpay orders only if payment_status is not pending
+    ]
+  }).populate('customer').populate('shipping_address').populate('items.product').skip(perPage * (page - 1)).limit(perPage);
+  const total = await Order.countDocuments({
+    $or: [
+      { payment_method: { $ne: 'Razorpay' } }, // Include orders where payment_method is not Razorpay
+      { payment_method: 'Razorpay', payment_status: { $ne: 'Pending' } } // Include Razorpay orders only if payment_status is not pending
+    ]
+  });
+
+    res.status(200).json({ success: true, data: { orders, total } });
 }   
 
 export const updateOrder = async (req, res) => {
@@ -228,3 +241,18 @@ export const bestSellers = async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to fetch best sellers' });
   }
 };
+
+
+export const updateOrderStatus = async (req, res) => {
+  const { encryptedData } = req.body;
+
+  const { id, status } = JSON.parse(decryptData(encryptedData));
+
+    const order = await Order.findById(id);
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+    order.status.push({ status , date: new Date() });
+    await order.save();
+    res.status(200).json({ success: true, message: 'Order status updated successfully' });
+}

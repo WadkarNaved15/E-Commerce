@@ -3,20 +3,7 @@ import AdminSidebar from "../../../components/admin/AdminSidebar";
 import { BarChart } from "../../../components/admin/Charts";
 import apiClient from "../../../utils/apiClient";
 
-const months = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "Aug",
-  "Sept",
-  "Oct",
-  "Nov",
-  "Dec",
-];
+
 
 const Barcharts = () => {
   const [expense, setExpense] = useState([]);
@@ -24,12 +11,14 @@ const Barcharts = () => {
   const [orders, setOrders] = useState([]);
   const [cancelledOrders, setCancelledOrders] = useState([]);
   const [salesData, setSalesData] = useState([]);
+  const [months, setMonths] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
       const response = await apiClient.get("/stats/bar-stats"); 
 
       if (response.data.success) {
         const barChartData = response.data.barChartData;
+        const month = barChartData.map((barChartData) => barChartData.month);
         const expense = barChartData.map((barChartData) => barChartData.expense);
         const revenue = barChartData.map((barChartData) => barChartData.revenue);
         const orders = barChartData.map((barChartData) => barChartData.deliveredCount);
@@ -44,6 +33,7 @@ const Barcharts = () => {
         totalSold);
         const salesDataRevenue = response.data.salesData.map((data) => data.totalRevenue/1000);
         setSalesData({ labels: salesDataLabels, values: salesDataValues, revenue: salesDataRevenue });
+        setMonths(month);
       }
     }
     fetchData();

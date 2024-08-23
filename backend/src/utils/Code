@@ -1,0 +1,341 @@
+export const getAllProducts = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { encryptedData } = req.body;
+    const decryptedData = decryptData(encryptedData);
+    const parsedData = JSON.parse(decryptedData);
+    const { category, brand, sort = 'asc', search, page = 1, perPage = 6 } = parsedData;
+
+    let query = {};
+    let regexSearch = new RegExp('');
+
+    if (category) {
+        query.$or = [
+            { category: category },
+            { subcategory: category }
+        ];
+    }
+
+    if (brand) {
+        query.brand = brand;
+    }
+
+    let searchTerms = [];
+    let maxPrice;
+
+    const escapeRegex = (string) => {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escapes special characters
+    };
+
+    if (search) {
+        const underRegex = /under\s+(\d+)/i;
+        const underMatch = search.match(underRegex);
+
+        searchTerms = search.split(/\s+/);
+
+        if (underMatch) {
+            maxPrice = parseInt(underMatch[1], 10);
+            query.price = { $lte: maxPrice };
+            searchTerms = search.replace(underRegex, '').trim().split(/\s+/);
+        }
+
+        searchTerms = searchTerms.flatMap(term => getSynonyms(term).map(escapeRegex));
+
+        let categoryMappings = getCategoryMappings(searchTerms);
+        categoryMappings = [...new Set(categoryMappings)];
+
+        regexSearch = new RegExp(searchTerms.map(term => `\\b${term}\\b`).join('|'), 'i');
+
+        query.$or = [
+            { name: { $regex: regexSearch } },
+            { category: { $regex: regexSearch } },
+            { subcategory: { $regex: regexSearch } },
+            {
+                specifications: {
+                    $elemMatch: {
+                        key: { $regex: regexSearch },
+                        value: { $regex: regexSearch }
+                    }
+                }
+            },
+            ...categoryMappings.map(cat => ({ category: { $regex: `^${escapeRegex(cat)}$`, $options: 'i' } })),
+            { keywords: { $in: searchTerms } } // Updated to handle the keywords array
+        ];
+    }
+
+    try {
+        let pipeline = [];
+
+        if (Object.keys(query).length === 0) {
+            pipeline = [
+                {
+                    $addFields: {
+                        isOutOfStock: { $eq: ['$stock', 0] }
+                    }
+                },
+                {
+                    $sort: {
+                        isOutOfStock: -1,
+                        name: 1
+                    }
+                }
+            ];
+        } else {
+            pipeline = [
+                { $match: query },
+                {
+                    $addFields: {
+                        matchedWords: {
+                            $setUnion: [
+                                {
+                                    $filter: {
+                                        input: searchTerms,
+                                        as: 'term',
+                                        cond: {
+                                            $regexMatch: {
+                                                input: {
+                                                    $convert: {
+                                                        input: { $toString: '$name' },
+                                                        to: 'string',
+                                                        onError: null // Handle conversion failure gracefully
+                                                    }
+                                                },
+                                                regex: { $concat: ['\\b', '$$term', '\\b'] },
+                                                options: 'i'
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    $filter: {
+                                        input: searchTerms,
+                                        as: 'term',
+                                        cond: {
+                                            $regexMatch: {
+                                                input: {
+                                                    $convert: {
+                                                        input: { $toString: '$category' },
+                                                        to: 'string',
+                                                        onError: null // Handle conversion failure gracefully
+                                                    }
+                                                },
+                                                regex: { $concat: ['\\b', '$$term', '\\b'] },
+                                                options: 'i'
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    $filter: {
+                                        input: searchTerms,
+                                        as: 'term',
+                                        cond: {
+                                            $regexMatch: {
+                                                input: {
+                                                    $convert: {
+                                                        input: { $toString: '$subcategory' },
+                                                        to: 'string',
+                                                        onError: null // Handle conversion failure gracefully
+                                                    }
+                                                },
+                                                regex: { $concat: ['\\b', '$$term', '\\b'] },
+                                                options: 'i'
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    $filter: {
+                                        input: searchTerms,
+                                        as: 'term',
+                                        cond: {
+                                            $or: [
+                                                {
+                                                    $regexMatch: {
+                                                        input: {
+                                                            $convert: {
+                                                                input: { $arrayElemAt: ['$specifications.key', 0] }, // Extract the first key
+                                                                to: 'string',
+                                                                onError: null // Handle conversion failure gracefully
+                                                            }
+                                                        },
+                                                        regex: { $concat: ['\\b', '$$term', '\\b'] },
+                                                        options: 'i'
+                                                    }
+                                                },
+                                                {
+                                                    $regexMatch: {
+                                                        input: {
+                                                            $convert: {
+                                                                input: { $arrayElemAt: ['$specifications.value', 0] }, // Extract the first value
+                                                                to: 'string',
+                                                                onError: null // Handle conversion failure gracefully
+                                                            }
+                                                        },
+                                                        regex: { $concat: ['\\b', '$$term', '\\b'] },
+                                                        options: 'i'
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    $filter: {
+                                        input: searchTerms,
+                                        as: 'term',
+                                        cond: {
+                                            $in: ['$$term', '$keywords'] // Handle matching terms in the keywords array
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        matchCount: {
+                            $size: {
+                                $setUnion: [
+                                    {
+                                        $filter: {
+                                            input: searchTerms,
+                                            as: 'term',
+                                            cond: {
+                                                $regexMatch: {
+                                                    input: {
+                                                        $convert: {
+                                                            input: { $toString: '$name' },
+                                                            to: 'string',
+                                                            onError: null // Handle conversion failure gracefully
+                                                        }
+                                                    },
+                                                    regex: { $concat: ['\\b', '$$term', '\\b'] },
+                                                    options: 'i'
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        $filter: {
+                                            input: searchTerms,
+                                            as: 'term',
+                                            cond: {
+                                                $regexMatch: {
+                                                    input: {
+                                                        $convert: {
+                                                            input: { $toString: '$category' },
+                                                            to: 'string',
+                                                            onError: null // Handle conversion failure gracefully
+                                                        }
+                                                    },
+                                                    regex: { $concat: ['\\b', '$$term', '\\b'] },
+                                                    options: 'i'
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        $filter: {
+                                            input: searchTerms,
+                                            as: 'term',
+                                            cond: {
+                                                $regexMatch: {
+                                                    input: {
+                                                        $convert: {
+                                                            input: { $toString: '$subcategory' },
+                                                            to: 'string',
+                                                            onError: null // Handle conversion failure gracefully
+                                                        }
+                                                    },
+                                                    regex: { $concat: ['\\b', '$$term', '\\b'] },
+                                                    options: 'i'
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        $filter: {
+                                            input: searchTerms,
+                                            as: 'term',
+                                            cond: {
+                                                $regexMatch: {
+                                                    input: {
+                                                        $convert: {
+                                                            input: { $arrayElemAt: ['$specifications.key', 0] }, // Extract the first key
+                                                            to: 'string',
+                                                            onError: null // Handle conversion failure gracefully
+                                                        }
+                                                    },
+                                                    regex: { $concat: ['\\b', '$$term', '\\b'] },
+                                                    options: 'i'
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        $filter: {
+                                            input: searchTerms,
+                                            as: 'term',
+                                            cond: {
+                                                $regexMatch: {
+                                                    input: {
+                                                        $convert: {
+                                                            input: { $arrayElemAt: ['$specifications.value', 0] }, // Extract the first value
+                                                            to: 'string',
+                                                            onError: null // Handle conversion failure gracefully
+                                                        }
+                                                    },
+                                                    regex: { $concat: ['\\b', '$$term', '\\b'] },
+                                                    options: 'i'
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        $filter: {
+                                            input: searchTerms,
+                                            as: 'term',
+                                            cond: {
+                                                $in: ['$$term', '$keywords'] // Handle matching terms in the keywords array
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                {
+                    $sort: {
+                        matchCount: -1,
+                        price: sort === 'asc' ? 1 : -1
+                    }
+                }
+            ];
+        }
+
+        pipeline.push({ $skip: (page - 1) * perPage });
+        pipeline.push({ $limit: perPage });
+
+        const results = await Product.aggregate(pipeline)
+            .collation({ locale: 'en', strength: 2 })
+            .exec();
+
+            console.log(results)
+        const totalProducts = await Product.countDocuments(query);
+
+        const encryptedResponse = encryptData(JSON.stringify({ products: results, total: totalProducts }));
+
+        res.status(200).json({
+            success: true,
+            data: encryptedResponse
+        });
+    } catch (error) {
+        console.error('Error fetching products:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching products'
+        });
+    }
+};

@@ -3,9 +3,11 @@ import AdminSidebar from "../../../components/admin/AdminSidebar";
 import "../../../styles/admin-styles/category.css";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router";
 
 const NewCategory = () => {
   const server = import.meta.env.VITE_SERVER;
+  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [type, setType] = useState("simple");
   const [imageFile, setImageFile] = useState(null);
@@ -61,6 +63,7 @@ const NewCategory = () => {
 
       if (response.status === 201) {
         toast.success("Category created successfully");
+        navigate("/admin/category");
         setName("");
         setType("simple");
         setAltText("");

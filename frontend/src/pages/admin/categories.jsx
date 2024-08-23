@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaPlus } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { Link , useNavigate} from 'react-router-dom';
 import axios from 'axios';
 import AdminSidebar from '../../components/admin/AdminSidebar';
 import TableHOC from '../../components/admin/TableHOC';
@@ -39,15 +39,19 @@ const columns = [
 ];
 
 const Categories = () => {
+  const navigate = useNavigate();
   const [rows, setRows] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
+  const handleNavigate = (category) => {
+    navigate(`/admin/categorymanagement/${category._id}`,{state: {category}});
+  };
   useEffect(() => {
     const server = import.meta.env.VITE_SERVER
     const fetchCategories = async () => {
       try {
-        const encryptedData = encryptData(JSON.stringify({ page: page + 1, perPage: 15 }));
+        const encryptedData = encryptData(JSON.stringify({ page: page + 1, perPage: 10 }));
         const encryptedResponse = await axios.post(`${server}/category/all`,{
           encryptedData,
         } );
@@ -57,10 +61,10 @@ const Categories = () => {
         const updatedRows = categories.map((row) => ({
           ...row,
           image: <img src={`${server}/${row?.Image?.url}`} alt={row?.Image?.alt_text} />,
-          action: <Link to={`/admin/categorymanagement/${row._id}`}>Manage</Link>,
+          action: <button className="manage" onClick={() => handleNavigate(row)}>Manage</button>,
         }));
         setRows(updatedRows);
-        setTotalPages(Math.ceil(total / 15));
+        setTotalPages(Math.ceil(total / 10));
       } catch (error) {
         console.error('Error fetching categories:', error);
       }

@@ -5,7 +5,7 @@ import AdminSidebar from "../../components/admin/AdminSidebar";
 import TableHOC from "../../components/admin/TableHOC";
 import Pagination from "../../components/Pagination";
 import { toast } from "react-hot-toast";
-import { decryptData } from "../../utils/Encryption";
+import { decryptData , encryptData} from "../../utils/Encryption";
 import { format } from "date-fns";
 
 const couponColumns = [
@@ -46,17 +46,15 @@ const Coupons = () => {
     fetchCoupons();
   }, []);
 
-  const fetchCoupons = () => {
-    axios
-      .get(`${server}/coupon/all`)
-      .then((res) => {
-        const { data } = res.data;
-        const coupons = JSON.parse(decryptData(data))
-        setRows(coupons);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+  const fetchCoupons = async() => {
+    const encryptedData = encryptData(JSON.stringify({ page: page + 1, perPage: 10 }));
+    const encryptedResponse = await axios.post(`${server}/coupon/all`, {
+      encryptedData
+    })
+
+    const { coupons, total } = JSON.parse(decryptData(encryptedResponse.data.data));
+    setRows(coupons);
+    setTotalPages(Math.ceil(total / 10));
   };
 
 
@@ -86,8 +84,7 @@ const Coupons = () => {
     couponColumns,
     rows,
     "dashboard-coupon-box",
-    "Coupons",
-    rows.length > 6
+    "Coupons"
   );
 
   return (

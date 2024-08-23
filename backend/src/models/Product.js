@@ -7,7 +7,7 @@ const stockHistorySchema = new Schema({
   previousStock: { type: Number, required: true },
   newStock: { type: Number, required: true },
   purchase_price: { type: Number, required: true },
-  reason: { type: String, enum: ["new", "restock"], required: true }, 
+  reason: { type: String, enum: ["new", "restock","stock reduction"], required: true }, 
 });
 
 // Index on stockHistory.date for querying by date
@@ -41,6 +41,7 @@ const productSchema = new Schema({
     required: true,
   },
   specifications: [specificationSchema],
+  keywords: [{ type: String }], // Added keywords field
   rating: { type: Number, default: 0 },
   created_at: {
     type: Date,
@@ -70,6 +71,9 @@ productSchema.index({ stock: 1 });
 
 // Compound index on category and brand for filtering
 productSchema.index({ category: 1, brand: 1 });
+
+// Index on keywords for efficient querying
+productSchema.index({ keywords: 1 });
 
 const Product = model('Product', productSchema);
 

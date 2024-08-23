@@ -4,7 +4,7 @@ const { Schema, model } = mongoose;
 
 // Subcategory schema
 const subcategorySchema = new Schema({
-  name: { type: String, required: true },
+  name: { type: String },
   // Remove image from subcategory schema
 }, {
   _id: false,  // Subcategories won't have their own _id
@@ -18,7 +18,10 @@ const categorySchema = new Schema({
     alt_text: { type: String, required: true },
   },
   type: { type: String, required: true ,enum: ["price", "simple"]},
-  subcategories: [subcategorySchema],  
+  subcategories: { 
+    type: [subcategorySchema],  
+    default: []
+  },
 }, {
   timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
 });

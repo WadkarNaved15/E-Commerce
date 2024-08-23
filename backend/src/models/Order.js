@@ -14,7 +14,7 @@ const statusSchema = new Schema({
   status: { 
     type: String, 
     required: true, 
-    enum: ['Pending', 'Ordered', 'Shipped', 'Delivered', 'Cancelled', 'Refunded'], 
+    enum: ['Pending','Processing', 'Ordered', 'Shipped', 'Delivered', 'Cancelled', 'Refunded'], 
     default: 'Pending' 
   },
   date: { type: Date, default: Date.now }

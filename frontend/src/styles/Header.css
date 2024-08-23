@@ -58,6 +58,10 @@
     &:hover{
         background-color: #f0f0f0;
     }
+
+}
+.search:disabled{
+    cursor: not-allowed;
 }
 
 .header-right{
@@ -148,6 +152,8 @@
         display: block;
         gap: 0;
         margin: 0;
+        position: sticky;
+        top: 2rem;
         display: flex;
         flex-direction: row;
         align-items: center;

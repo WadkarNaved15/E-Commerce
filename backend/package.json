@@ -28,10 +28,13 @@
     "libphonenumber-js": "^1.11.7",
     "mongoose": "^8.5.1",
     "multer": "^1.4.5-lts.1",
+    "natural": "^8.0.1",
     "node-cache": "^5.1.2",
     "nodemon": "^3.1.4",
+    "pluralize": "^8.0.0",
     "puppeteer": "^23.1.0",
     "razorpay": "^2.9.4",
+    "stemmer": "^2.0.1",
     "stripe": "^16.6.0",
     "twilio": "^5.2.2",
     "uuid": "^10.0.0"

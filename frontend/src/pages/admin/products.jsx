@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaPlus } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { Link , useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import AdminSidebar from '../../components/admin/AdminSidebar';
 import TableHOC from '../../components/admin/TableHOC';
@@ -44,39 +44,47 @@ const columns = [
 ];
 
 const Products = () => {
+  const navigate = useNavigate();
   const [rows, setRows] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
+  const handleNavigate = (product) => {
+    navigate(`/admin/productmanagement/${product._id}`);
+  };
+  const fetchProducts = async () => {
+    const server = import.meta.env.VITE_SERVER
+    try {
+      const encryptedData = encryptData(JSON.stringify({
+        page: page + 1, 
+        perPage: 10,
+      }));
+      const encryptedResponse = await axios.post(`${server}/products/all`,{
+        encryptedData,
+      });
+      const decryptedResponse = decryptData(encryptedResponse.data.data);
+      const parsedData = JSON.parse(decryptedResponse);
+      const { products, total } = parsedData;
+      const updatedRows = products.map((row) => ({
+        ...row,
+        images: <img src={`${server}/${row.images[0]?.url}`} alt={row.images[0]?.alt_text} />,
+        action: <button className="manage" onClick={() => handleNavigate(row)}>Manage</button>,
+      }));
+      setRows(updatedRows);
+      setTotalPages(Math.ceil(total / 10));
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
+  };
   useEffect(() => {
-    const fetchProducts = async () => {
-      const server = import.meta.env.VITE_SERVER
-      try {
-        const encryptedData = encryptData(JSON.stringify({
-          page: page + 1, 
-          perPage: 6,
-        }));
-        const encryptedResponse = await axios.post(`${server}/products/all`,{
-          encryptedData,
-        });
-        const decryptedResponse = decryptData(encryptedResponse.data.data);
-        const parsedData = JSON.parse(decryptedResponse);
-        const { products, total } = parsedData;
-        const updatedRows = products.map((row) => ({
-          ...row,
-          images: <img src={`${server}/${row.images[0]?.url}`} alt={row.images[0]?.alt_text} />,
-          action: <Link to={`/admin/productmanagement/${row._id}`}>Manage</Link>,
-        }));
-        setRows(updatedRows);
-        setTotalPages(Math.ceil(total / 6));
-      } catch (error) {
-        console.error('Error fetching products:', error);
-      }
-    };
+
 
     fetchProducts();
   }, [page]);
 
+  useEffect(()=>{
+    fetchProducts()
+  },[])
 
   const TableComponent = TableHOC(columns, rows, 'dashboard-product-box', 'Products');
 

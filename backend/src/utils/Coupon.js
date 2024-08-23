@@ -19,8 +19,13 @@ export const createCoupon = async (req, res) => {
 };
 
 export const getCoupons = async (req, res) => {
-    const coupons = await Coupon.find();
-    const encryptedResponse = encryptData(JSON.stringify(coupons));
+    const { encryptedData } = req.body;
+    const decryptedData = decryptData(encryptedData);
+    const parsedData = JSON.parse(decryptedData);
+    const { page = 1, perPage = 10 } = parsedData;
+    const coupons = await Coupon.find().skip((page - 1) * perPage).limit(perPage);
+    const total = await Coupon.countDocuments();
+    const encryptedResponse = encryptData(JSON.stringify({ coupons, total }));
     res.status(200).json({ success: true, data: encryptedResponse });
 }
 
@@ -58,3 +63,12 @@ export const applyCoupon = async (req, res) => {
         return res.status(200).json({ success: true, message: 'Coupon applied', discount: coupon.discountValue });
     }
 }   
+
+export const deleteCoupon = async (req, res) => {
+    const id = req.params.id;
+    const coupon = await Coupon.findByIdAndDelete(id);
+    if (!coupon) {
+        return res.status(404).json({ success: false, message: 'Coupon not found' });
+    }
+    res.status(200).json({ success: true, message: 'Coupon deleted successfully' });
+}

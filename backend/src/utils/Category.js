@@ -73,6 +73,7 @@ export const createCategory = async (req, res) => {
     try {
         const { name, type,subcategories } = req.body;
         const { path } = req.file; // Ensure multer or similar middleware is used to handle file uploads
+        const parsedSubcategories = typeof subcategories === "string" ? JSON.parse(subcategories) : subcategories;
         const category = await Category.create({
             name,
             type,
@@ -80,7 +81,7 @@ export const createCategory = async (req, res) => {
                 url: path,
                 alt_text: name
             },
-            subcategories
+            subcategories: Array.isArray(parsedSubcategories) ? parsedSubcategories : [],
         });
 
         res.status(201).json({ success: true, data: category });
@@ -92,24 +93,41 @@ export const createCategory = async (req, res) => {
 // Update a category
 export const updateCategory = async (req, res) => {
     try {
-        const { id } = req.params;
-        const { name, type, subcategories } = req.body;
-        const { path } = req.file; // Ensure multer or similar middleware is used to handle file uploads
-        const category = await Category.findByIdAndUpdate(id, {
-            name,
-            type,
-            Image: {
-                url: path,
-                alt_text: name
-            },
-            subcategories
-        });
-        res.status(200).json({ success: true });
+      const { id } = req.params;
+      const { name, type, subcategories } = req.body;
+      const path = req.file?.path;
+  
+      // Build the update object dynamically
+      const updateData = {};
+  
+      if (name) updateData.name = name;
+      if (type) updateData.type = type;
+  
+      if (path) {
+        updateData.Image = {
+          url: path,
+          alt_text: name || '', // Use the name if provided for alt_text
+        };
+      }
+  
+      if (subcategories) {
+        const parsedSubcategories = typeof subcategories === 'string' ? JSON.parse(subcategories) : subcategories;
+        updateData.subcategories = Array.isArray(parsedSubcategories) ? parsedSubcategories : [];
+      }
+  
+      // Find the category by ID and update it with the new data
+      const category = await Category.findByIdAndUpdate(id, updateData, { new: true });
+  
+      if (!category) {
+        return res.status(404).json({ success: false, message: 'Category not found' });
+      }
+  
+      res.status(200).json({ success: true, data: category });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+      res.status(500).json({ success: false, error: error.message });
     }
-};
-
+  };
+  
 // Delete a category
 export const deleteCategory = async (req, res) => {
     try {

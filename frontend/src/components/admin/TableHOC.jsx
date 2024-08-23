@@ -15,7 +15,7 @@ function TableHOC(columns, data, containerClassname, heading) {
       columns,
       data,
       initialState: {
-        pageSize: 6,
+        pageSize: 10,
       },
     };
 

@@ -3,15 +3,16 @@ import { GoSearch } from 'react-icons/go';
 import { MdOutlineShoppingCart } from 'react-icons/md';
 import { FaInstagram, FaWhatsapp } from 'react-icons/fa';
 import { CgProfile } from "react-icons/cg";
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate , useLocation} from 'react-router-dom';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { FiLogIn } from "react-icons/fi";
 import '../styles/Header.css';
 
 const Header = () => {
+    const location = useLocation();
     const { isLoggedIn } = useSelector((state) => state.user);
-    const [searchInput, setSearchInput] = useState('');
+    const [searchInput, setSearchInput] = useState(location.state?.searchInput || '');
     const [suggestions, setSuggestions] = useState([]);
     const [selectedIndex, setSelectedIndex] = useState(-1);
     const [showSuggestions, setShowSuggestions] = useState(false);
@@ -30,7 +31,7 @@ const Header = () => {
     }, []);
 
     const handleSearch = (query) => {
-        navigate(`/display/${query}`);
+        navigate(`/display/${query}`,{state:{searchInput:searchInput}});
         setSuggestions([]);
         setShowSuggestions(false);
     };
@@ -73,11 +74,14 @@ const Header = () => {
             setSelectedIndex((prevIndex) => Math.max(prevIndex - 1, 0));
         } else if (e.key === 'Enter') {
             e.preventDefault();
+            if(searchInput.length >= 3){
             if (selectedIndex >= 0 && selectedIndex < suggestions.length) {
+                setSearchInput(suggestions[selectedIndex]); // Set the input value to the selected suggestion
                 handleSearch(suggestions[selectedIndex]);
             } else {
                 handleSearch(searchInput);
             }
+        }
         }
     };
 
@@ -97,7 +101,7 @@ const Header = () => {
                             onKeyDown={handleKeyDown}
                             placeholder="Search..."
                         />
-                        <button className='search' type="submit">
+                        <button disabled={!searchInput || searchInput.length < 3} className='search' type="submit">
                             <GoSearch color='black' size={15} />
                         </button>
                         {showSuggestions && suggestions.length > 0 && (
@@ -143,7 +147,7 @@ const Header = () => {
                     onKeyDown={handleKeyDown}
                     placeholder="Search..."
                 />
-                <button className='search' type="submit">
+                <button disabled={!searchInput || searchInput.length < 3} className='search' type="submit">
                     <GoSearch color='black' size={15} />
                 </button>
             </form>

@@ -1,12 +1,14 @@
 import { useState } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
-import "../../../styles/admin-styles/products.css"
+import "../../../styles/admin-styles/products.css";
 import axios from "axios";
 import { encryptData } from "../../../utils/Encryption";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router";
 
 const NewProduct = () => {
-  const server = import.meta.env.VITE_SERVER
+  const server = import.meta.env.VITE_SERVER;
+  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [brand, setBrand] = useState("");
@@ -15,12 +17,13 @@ const NewProduct = () => {
   const [display_price, setDisplayPrice] = useState(null);
   const [purchase_price, setPurchasePrice] = useState(null);
   const [price, setPrice] = useState(null);
-  const [stock, setStock] = useState(1);
+  const [stock, setStock] = useState(0);
   const [photos, setPhotos] = useState([]);
-  const [specifications, setSpecifications] = useState([{ key: "", value: "" }]); // Add specifications state
+  const [specifications, setSpecifications] = useState([{ key: "", value: "" }]);
+  const [keywords, setKeywords] = useState([""]); // State for keywords
 
   const changeImageHandler = (e) => {
-    const files = Array.from(e.target.files); // Convert FileList to Array
+    const files = Array.from(e.target.files);
 
     files.forEach(file => {
       const reader = new FileReader();
@@ -55,9 +58,24 @@ const NewProduct = () => {
     setSpecifications(newSpecifications);
   };
 
+  const handleKeywordChange = (index, value) => {
+    const newKeywords = [...keywords];
+    newKeywords[index] = value;
+    setKeywords(newKeywords);
+  };
+
+  const addKeywordField = () => {
+    setKeywords([...keywords, ""]);
+  };
+
+  const removeKeywordField = (index) => {
+    const newKeywords = keywords.filter((_, i) => i !== index);
+    setKeywords(newKeywords);
+  };
+
   const submitHandler = async (e) => {
     e.preventDefault();
-  
+
     const productData = {
       name,
       description,
@@ -69,25 +87,27 @@ const NewProduct = () => {
       category,
       subcategory,
       specifications,
+      keywords, // Include keywords in the product data
     };
-  
+
     const encryptedData = encryptData(JSON.stringify(productData));
-  
+
     const formData = new FormData();
-    formData.append("data", encryptedData); // Add the encrypted data
+    formData.append("data", encryptedData);
     photos.forEach((photo) => {
       formData.append("images", photo.file);
     });
-  
+
     try {
       const response = await axios.post(`${server}/products/new`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-  
+
       if (response.status === 201) {
         toast.success("Product created successfully");
+        navigate("/admin/product");
       }
     } catch (error) {
       toast.error("Failed to create product");
@@ -99,8 +119,8 @@ const NewProduct = () => {
       <AdminSidebar />
       <main className="product-management">
         <article>
-        <h2>New Product</h2>
-          <form onSubmit={submitHandler}>      
+          <h2>New Product</h2>
+          <form onSubmit={submitHandler}>
             <div>
               <label>Name</label>
               <textarea
@@ -112,13 +132,11 @@ const NewProduct = () => {
             <div>
               <label>Description</label>
               <textarea
-                type="text"
                 placeholder="Description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
             </div>
-
             <div>
               <label>Brand</label>
               <input
@@ -128,32 +146,30 @@ const NewProduct = () => {
                 onChange={(e) => setBrand(e.target.value)}
               />
             </div>
-
             <div>
               <label>Purchase Price</label>
               <input
-                min={1}
+                min={0}
                 type="number"
                 placeholder="Purchase Price"
                 value={purchase_price}
                 onChange={(e) => setPurchasePrice(Number(e.target.value))}
               />
             </div>
-
             <div>
               <label>Display Price</label>
               <input
-                min={1}
+                min={0}
                 type="number"
                 placeholder="Display Price"
                 value={display_price}
                 onChange={(e) => setDisplayPrice(Number(e.target.value))}
               />
             </div>
-              <div>
+            <div>
               <label>Price</label>
               <input
-                min={1}
+                min={0}
                 type="number"
                 placeholder="Price"
                 value={price}
@@ -163,14 +179,13 @@ const NewProduct = () => {
             <div>
               <label>Stock</label>
               <input
-                min={1}
+                min={0}
                 type="number"
                 placeholder="Stock"
                 value={stock}
                 onChange={(e) => setStock(Number(e.target.value))}
               />
             </div>
-
             <div>
               <label>Category</label>
               <input
@@ -180,7 +195,6 @@ const NewProduct = () => {
                 onChange={(e) => setCategory(e.target.value)}
               />
             </div>
-            
             <div>
               <label>Subcategory</label>
               <input
@@ -194,7 +208,6 @@ const NewProduct = () => {
               <label>Photos</label>
               <input type="file" onChange={changeImageHandler} accept="image/*" multiple />
             </div>
-
             <div className="image-preview">
               {photos.map((photo, index) => (
                 <div key={index} className="image-item">
@@ -225,6 +238,23 @@ const NewProduct = () => {
                 </div>
               ))}
               <button type="button" onClick={addSpecificationField}>Add Specification</button>
+            </div>
+
+            {/* Keyword fields */}
+            <div className="keyword-fields">
+              <label>Keywords</label>
+              {keywords.map((keyword, index) => (
+                <div key={index}>
+                  <input
+                    type="text"
+                    placeholder="Keyword"
+                    value={keyword}
+                    onChange={(e) => handleKeywordChange(index, e.target.value)}
+                  />
+                  <button type="button" onClick={() => removeKeywordField(index)}>Remove</button>
+                </div>
+              ))}
+              <button type="button" onClick={addKeywordField}>Add Keyword</button>
             </div>
 
             <button type="submit">Create</button>

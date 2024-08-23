@@ -4,8 +4,25 @@ import { validationResult } from "express-validator";
 import { getSynonyms, getCategoryMappings } from "../middlewares/Functions.js"; 
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from "url";
 import { decryptData , encryptData } from "./Encryption.js";
+import natural from 'natural'; // Import the PorterStemmer from natural
+import pluralize from 'pluralize'; // Importing pluralize library for handling plural forms
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const {PorterStemmer} = natural;
+// Process terms to include both singular and plural forms
+const processTerms = (terms) => {
+    const uniqueTerms = new Set(terms.flatMap(term => {
+        const stemmed = PorterStemmer.stem(term);
+        const plural = pluralize.plural(term);
+        const singular = pluralize.singular(term);
+        return [stemmed, plural, singular].map(t => PorterStemmer.stem(t)); // Ensure stemming
+    }));
+
+    return Array.from(uniqueTerms);
+};
 
 
 export const getAllProducts = async (req, res) => {
@@ -39,45 +56,42 @@ export const getAllProducts = async (req, res) => {
     const escapeRegex = (string) => {
         return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escapes special characters
     };
-    
+
     if (search) {
         const underRegex = /under\s+(\d+)/i;
         const underMatch = search.match(underRegex);
-    
+
         searchTerms = search.split(/\s+/);
-    
+
         if (underMatch) {
             maxPrice = parseInt(underMatch[1], 10);
             query.price = { $lte: maxPrice };
             searchTerms = search.replace(underRegex, '').trim().split(/\s+/);
         }
-    
-        // Sanitize each search term
+
         searchTerms = searchTerms.flatMap(term => getSynonyms(term).map(escapeRegex));
-    
+
         let categoryMappings = getCategoryMappings(searchTerms);
-    
         categoryMappings = [...new Set(categoryMappings)];
-    
-        // Build the regex safely
+
         regexSearch = new RegExp(searchTerms.map(term => `\\b${term}\\b`).join('|'), 'i');
-    
+
         query.$or = [
-            { name: { $regex: regexSearch.source, $options: 'i' } },
-            { category: { $regex: regexSearch.source, $options: 'i' } },
-            { subcategory: { $regex: regexSearch.source, $options: 'i' } },
+            { name: { $regex: regexSearch } },
+            { category: { $regex: regexSearch } },
+            { subcategory: { $regex: regexSearch } },
             {
                 specifications: {
                     $elemMatch: {
-                        key: { $regex: regexSearch.source, $options: 'i' },
-                        value: { $regex: regexSearch.source, $options: 'i' }
+                        key: { $regex: regexSearch },
+                        value: { $regex: regexSearch }
                     }
                 }
             },
-            ...categoryMappings.map(cat => ({ category: { $regex: `^${escapeRegex(cat)}$`, $options: 'i' } }))
+            ...categoryMappings.map(cat => ({ category: { $regex: `^${escapeRegex(cat)}$`, $options: 'i' } })),
+            { keywords: { $in: searchTerms } } // Updated to handle the keywords array
         ];
     }
-    
 
     try {
         let pipeline = [];
@@ -97,53 +111,379 @@ export const getAllProducts = async (req, res) => {
                 }
             ];
         } else {
-            pipeline = [
-                { $match: query },
-                {
-                    $addFields: {
-                        matchCount: {
-                            $sum: [
-                                { $cond: [{ $regexMatch: { input: "$name", regex: regexSearch } }, 1, 0] },
-                                { $cond: [{ $regexMatch: { input: "$category", regex: regexSearch } }, 1, 0] },
-                                { $cond: [{ $regexMatch: { input: "$subcategory", regex: regexSearch } }, 1, 0] },
+    pipeline = [
+        { $match: query },
+        {
+            $addFields: {
+                // Assign priorities based on matches
+                priorityCategory: {
+                    $cond: {
+                        if: {
+                            $gt: [
                                 {
-                                    $sum: {
-                                        $map: {
-                                            input: "$specifications",
-                                            as: "spec",
-                                            in: {
-                                                $cond: [
-                                                    { $or: [
-                                                        { $regexMatch: { input: "$$spec.key", regex: regexSearch } },
-                                                        { $regexMatch: { input: "$$spec.value", regex: regexSearch } }
-                                                    ] },
-                                                    1,
-                                                    0
-                                                ]
+                                    $size: {
+                                        $filter: {
+                                            input: searchTerms,
+                                            as: 'term',
+                                            cond: {
+                                                $regexMatch: {
+                                                    input: {
+                                                        $convert: {
+                                                            input: { $toString: '$category' },
+                                                            to: 'string',
+                                                            onError: null
+                                                        }
+                                                    },
+                                                    regex: { $concat: ['\\b', '$$term', '\\b'] },
+                                                    options: 'i'
+                                                }
                                             }
                                         }
                                     }
-                                }
+                                },
+                                0
                             ]
-                        }
+                        },
+                        then: 3, // Example priority value for category
+                        else: 0
                     }
                 },
-                {
-                    $sort: {
-                        matchCount: -1,
-                        price: sort === "asc" ? 1 : -1
+                prioritySubcategory: {
+                    $cond: {
+                        if: {
+                            $gt: [
+                                {
+                                    $size: {
+                                        $filter: {
+                                            input: searchTerms,
+                                            as: 'term',
+                                            cond: {
+                                                $regexMatch: {
+                                                    input: {
+                                                        $convert: {
+                                                            input: { $toString: '$subcategory' },
+                                                            to: 'string',
+                                                            onError: null
+                                                        }
+                                                    },
+                                                    regex: { $concat: ['\\b', '$$term', '\\b'] },
+                                                    options: 'i'
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                0
+                            ]
+                        },
+                        then: 3, // Example priority value for subcategory
+                        else: 0
+                    }
+                },
+                priorityBrand: {
+                    $cond: {
+                        if: {
+                            $gt: [
+                                {
+                                    $size: {
+                                        $filter: {
+                                            input: searchTerms,
+                                            as: 'term',
+                                            cond: {
+                                                $regexMatch: {
+                                                    input: {
+                                                        $convert: {
+                                                            input: { $toString: '$brand' },
+                                                            to: 'string',
+                                                            onError: null
+                                                        }
+                                                    },
+                                                    regex: { $concat: ['\\b', '$$term', '\\b'] },
+                                                    options: 'i'
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                0
+                            ]
+                        },
+                        then: 3, // Example priority value for brand
+                        else: 0
+                    }
+                },
+
+                // Ensure numeric values are used for calculations
+                priorityScore: {
+                    $add: [
+                        { $ifNull: [{ $toDouble: '$priorityCategory' }, 0] },
+                        { $ifNull: [{ $toDouble: '$prioritySubcategory' }, 0] },
+                        { $ifNull: [{ $toDouble: '$priorityBrand' }, 0] }
+                    ]
+                },
+                // Debugging: Show calculated priority score and matched words
+                debugPriorityScore: {
+                    $add: [
+                        { $ifNull: [{ $toDouble: '$priorityCategory' }, 0] },
+                        { $ifNull: [{ $toDouble: '$prioritySubcategory' }, 0] },
+                        { $ifNull: [{ $toDouble: '$priorityBrand' }, 0] }
+                    ]
+                },
+                matchedWords: {
+                    $setUnion: [
+                        {
+                            $filter: {
+                                input: searchTerms,
+                                as: 'term',
+                                cond: {
+                                    $regexMatch: {
+                                        input: {
+                                            $convert: {
+                                                input: { $toString: '$name' },
+                                                to: 'string',
+                                                onError: null
+                                            }
+                                        },
+                                        regex: { $concat: ['\\b', '$$term', '\\b'] },
+                                        options: 'i'
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            $filter: {
+                                input: searchTerms,
+                                as: 'term',
+                                cond: {
+                                    $regexMatch: {
+                                        input: {
+                                            $convert: {
+                                                input: { $toString: '$category' },
+                                                to: 'string',
+                                                onError: null
+                                            }
+                                        },
+                                        regex: { $concat: ['\\b', '$$term', '\\b'] },
+                                        options: 'i'
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            $filter: {
+                                input: searchTerms,
+                                as: 'term',
+                                cond: {
+                                    $regexMatch: {
+                                        input: {
+                                            $convert: {
+                                                input: { $toString: '$subcategory' },
+                                                to: 'string',
+                                                onError: null
+                                            }
+                                        },
+                                        regex: { $concat: ['\\b', '$$term', '\\b'] },
+                                        options: 'i'
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            $filter: {
+                                input: searchTerms,
+                                as: 'term',
+                                cond: {
+                                    $or: [
+                                        {
+                                            $regexMatch: {
+                                                input: {
+                                                    $convert: {
+                                                        input: { $arrayElemAt: ['$specifications.key', 0] },
+                                                        to: 'string',
+                                                        onError: null
+                                                    }
+                                                },
+                                                regex: { $concat: ['\\b', '$$term', '\\b'] },
+                                                options: 'i'
+                                            }
+                                        },
+                                        {
+                                            $regexMatch: {
+                                                input: {
+                                                    $convert: {
+                                                        input: { $arrayElemAt: ['$specifications.value', 0] },
+                                                        to: 'string',
+                                                        onError: null
+                                                    }
+                                                },
+                                                regex: { $concat: ['\\b', '$$term', '\\b'] },
+                                                options: 'i'
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            $filter: {
+                                input: searchTerms,
+                                as: 'term',
+                                cond: {
+                                    $in: ['$$term', '$keywords']
+                                }
+                            }
+                        }
+                    ]
+                },
+                matchCount: {
+                    $size: {
+                        $setUnion: [
+                            {
+                                $filter: {
+                                    input: searchTerms,
+                                    as: 'term',
+                                    cond: {
+                                        $regexMatch: {
+                                            input: {
+                                                $convert: {
+                                                    input: { $toString: '$name' },
+                                                    to: 'string',
+                                                    onError: null
+                                                }
+                                            },
+                                            regex: { $concat: ['\\b', '$$term', '\\b'] },
+                                            options: 'i'
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                $filter: {
+                                    input: searchTerms,
+                                    as: 'term',
+                                    cond: {
+                                        $regexMatch: {
+                                            input: {
+                                                $convert: {
+                                                    input: { $toString: '$category' },
+                                                    to: 'string',
+                                                    onError: null
+                                                }
+                                            },
+                                            regex: { $concat: ['\\b', '$$term', '\\b'] },
+                                            options: 'i'
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                $filter: {
+                                    input: searchTerms,
+                                    as: 'term',
+                                    cond: {
+                                        $regexMatch: {
+                                            input: {
+                                                $convert: {
+                                                    input: { $toString: '$subcategory' },
+                                                    to: 'string',
+                                                    onError: null
+                                                }
+                                            },
+                                            regex: { $concat: ['\\b', '$$term', '\\b'] },
+                                            options: 'i'
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                $filter: {
+                                    input: searchTerms,
+                                    as: 'term',
+                                    cond: {
+                                        $regexMatch: {
+                                            input: {
+                                                $convert: {
+                                                    input: { $arrayElemAt: ['$specifications.key', 0] },
+                                                    to: 'string',
+                                                    onError: null
+                                                }
+                                            },
+                                            regex: { $concat: ['\\b', '$$term', '\\b'] },
+                                            options: 'i'
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                $filter: {
+                                    input: searchTerms,
+                                    as: 'term',
+                                    cond: {
+                                        $regexMatch: {
+                                            input: {
+                                                $convert: {
+                                                    input: { $arrayElemAt: ['$specifications.value', 0] },
+                                                    to: 'string',
+                                                    onError: null
+                                                }
+                                            },
+                                            regex: { $concat: ['\\b', '$$term', '\\b'] },
+                                            options: 'i'
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                $filter: {
+                                    input: searchTerms,
+                                    as: 'term',
+                                    cond: {
+                                        $in: ['$$term', '$keywords']
+                                    }
+                                }
+                            }
+                        ]
                     }
                 }
-            ];            
+            }
+        },
+        {
+            $project: {
+                product: '$$ROOT',
+                matchCount: 1,
+                matchedWords: 1,
+                _id: 0,
+                priorityScore: {
+                    $add: [
+                        { $ifNull: [{ $toDouble: '$priorityCategory' }, 0] },
+                        { $ifNull: [{ $toDouble: '$prioritySubcategory' }, 0] },
+                        { $ifNull: [{ $toDouble: '$priorityBrand' }, 0] }
+                    ]
+                }
+            }
+        },
+        {
+            $sort: {
+                priorityScore: -1,
+                matchCount: -1
+            }
+        },
+        {
+            $skip: (page - 1) * perPage
+        },
+        {
+            $limit: perPage
         }
+    ];
+}
 
-        pipeline.push({ $skip: (page - 1) * perPage });
-        pipeline.push({ $limit: perPage });
+        
 
         const results = await Product.aggregate(pipeline)
-            .collation({ locale: "en", strength: 2 }) // Apply collation here
+            .collation({ locale: 'en', strength: 2 })
             .exec();
 
+       console.log(results)
         const totalProducts = await Product.countDocuments(query);
 
         const encryptedResponse = encryptData(JSON.stringify({ products: results, total: totalProducts }));
@@ -156,15 +496,10 @@ export const getAllProducts = async (req, res) => {
         console.error('Error fetching products:', error);
         res.status(500).json({
             success: false,
-            message: 'Failed to fetch products',
+            message: 'Error fetching products'
         });
     }
 };
-
-
-
-
-
 
 
 
@@ -206,16 +541,17 @@ export const getProduct = async (req, res) => {
 
 
 export const updateProduct = async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id);
 
+    const product = await Product.findById(req.params.id);
     if (!product) {
       return res.status(404).json({
         success: false,
-        message: 'Product not found'
+        message: 'Product not found',
       });
     }
 
+    // Decrypt and parse the incoming data
+    const { data } = req.body;
     const {
       name,
       description,
@@ -225,81 +561,89 @@ export const updateProduct = async (req, res) => {
       stock,
       category,
       display_price,
-      edited_image_index,
-      deleted_images,
-    } = req.body;
+      specifications,
+      deletedImageUrls: deleted_images,
+      subcategory,
+      keywords,
+    } = JSON.parse(decryptData(data));
 
-    // Handle new images
+    console.log(
+      name,
+      description,
+      brand,
+      purchase_price,
+      price,
+      stock,
+      category,
+      display_price,
+      specifications,
+      deleted_images,
+      subcategory,
+      keywords
+    );
+
+    // Handle new images uploaded
     const newImages = req.files?.new_images || [];
-    const mappedNewImages = newImages.map(image => ({
-      url: image.path,
-      alt_text: name
+    const mappedNewImages = newImages.map((image) => ({
+      url: image.path, // Assuming multer is storing files locally
+      alt_text: name,
     }));
 
-    const existingImages = JSON.parse(req.body.existing_images || '[]');
+    // Get existing images directly from the product in the database
+    let existingImages = product.images;
 
-    // Handle existing images and edited image
-    const updatedImages = existingImages.map((url, i) => {
-      if (i === edited_image_index) {
-        // Insert edited image
-        return { url: mappedNewImages.length ? mappedNewImages.shift().url : url, alt_text: name };
-      } else if (i > edited_image_index) {
-        // Move existing images one index further
-        return { url, alt_text: name };
-      }
-      return { url, alt_text: name };
-    });
+    // Combine existing images with new images
+    let updatedImages = [...existingImages, ...mappedNewImages];
 
-    // Append remaining new images
-    updatedImages.push(...mappedNewImages);
+    // Handle deletions of old images
+    if (deleted_images?.length) {
+      deleted_images.forEach(async (url) => {
+        const filePath = path.join(__dirname, 'uploads', path.basename(url));
+        fs.unlink(filePath, (err) => {
+          if (err) console.error('Error deleting file:', err);
+        });
 
-    // Calculate stock change and log to stock history
+        // Filter out deleted image URLs from the updated image list
+        updatedImages = updatedImages.filter((image) => image.url !== url);
+      });
+    }
+
+    // Calculate stock change and log it to stock history
     const previousStock = product.stock;
     const stockChange = stock - previousStock;
 
     if (stockChange !== 0) {
-
       product.stockHistory.push({
         previousStock,
         newStock: stock,
-        reason: "restock",
-        purchase_price
+        reason: stockChange > 0 ? 'restock' : 'stock reduction',
+        purchase_price,
+        date: Date.now(), // Timestamp for the stock change
       });
     }
 
-    // Update product details
+    // Update product details with the new data
     product.name = name;
     product.description = description;
     product.brand = brand;
     product.price = price;
     product.stock = stock;
     product.category = category;
+    product.subcategory = subcategory;
     product.display_price = display_price;
     product.images = updatedImages;
+    product.specifications = specifications;
+    product.keywords = keywords;
     product.updated_at = Date.now();
 
-    // Save updated product
+    // Save the updated product
     await product.save();
-
-    // Handle deletions of old images
-    deleted_images?.forEach(async (url) => {
-      const filePath = path.join(__dirname, '../uploads', path.basename(url)); // Adjust path as needed
-      fs.unlink(filePath, (err) => {
-        if (err) console.error('Error deleting file:', err);
-      });
-    });
 
     res.status(200).json({
       success: true,
-      data: product,
+      message: 'Product updated successfully',
     });
-  } catch (error) {
-    console.error('Error updating product:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error updating product',
-    });
-  }
+
 };
 
 
@@ -329,6 +673,7 @@ export const newProduct = async (req, res) => {
       category,
       subcategory,
       specifications,
+      keywords
     } = JSON.parse(decryptedData); // Decrypt and parse the data
 
     const images = req.files;
@@ -357,6 +702,7 @@ export const newProduct = async (req, res) => {
           purchase_price: purchase_price,
         },
       ],
+      keywords
     });
 
     await newProduct.save();

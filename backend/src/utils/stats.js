@@ -184,7 +184,23 @@ export const getDashboardStats = async (req, res) => {
   };
 
   
-  const months = getMonthsForYear();
+  const date = new Date();
+const year = date.getFullYear();
+
+const months = [
+  { startOfMonth: new Date(year, 0, 1), endOfMonth: new Date(year, 0, 31) },  // January
+  { startOfMonth: new Date(year, 1, 1), endOfMonth: new Date(year, 1, 29) },  // February
+  { startOfMonth: new Date(year, 2, 1), endOfMonth: new Date(year, 2, 31) },  // March
+  { startOfMonth: new Date(year, 3, 1), endOfMonth: new Date(year, 3, 30) },  // April
+  { startOfMonth: new Date(year, 4, 1), endOfMonth: new Date(year, 4, 31) },  // May
+  { startOfMonth: new Date(year, 5, 1), endOfMonth: new Date(year, 5, 30) },  // June
+  { startOfMonth: new Date(year, 6, 1), endOfMonth: new Date(year, 6, 31) },  // July
+  { startOfMonth: new Date(year, 7, 1), endOfMonth: new Date(year, 7, 31) },  // August
+  { startOfMonth: new Date(year, 8, 1), endOfMonth: new Date(year, 8, 30) },  // September
+  { startOfMonth: new Date(year, 9, 1), endOfMonth: new Date(year, 9, 31) },  // October
+  { startOfMonth: new Date(year, 10, 1), endOfMonth: new Date(year, 10, 30) }, // November
+  { startOfMonth: new Date(year, 11, 1), endOfMonth: new Date(year, 11, 31) }  // December
+];
            
 
   const expensesPromises = months.map(({ startOfMonth, endOfMonth }) => {

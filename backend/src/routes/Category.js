@@ -13,7 +13,7 @@ router.get("/simple", tryCatchWrapper(getSimpleCategory));
 router.get("/price", tryCatchWrapper(getPriceCategory));
 router.get("/user",tryCatchWrapper(getAllCategories))
 router.post("/", tryCatchWrapper(getCategory));
-router.put("/",upload.single("image"), tryCatchWrapper(updateCategory));
+router.put("/:id",upload.single("image"), tryCatchWrapper(updateCategory));
 router.delete("/", tryCatchWrapper(deleteCategory));
 
 

@@ -1,50 +1,37 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaTrash } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useLocation , useNavigate } from "react-router-dom";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
+import axios from "axios";
+import { encryptData , decryptData } from "../../../utils/Encryption";
 import "../../../styles/admin-styles/products.css";
+import toast from "react-hot-toast";
 
-const img =
-  "https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8c2hvZXN8ZW58MHx8MHx8&w=1000&q=804";
-
-const orderItems = [
-  {
-    name: "Puma Shoes",
-    photo: img,
-    id: "asdsaasdas",
-    quantity: 4,
-    price: 2000,
-  },
-];
-
-const statusOptions = ["Processing", "Shipped", "Delivered", "Cancelled"];
+const statusOptions = ["Processing", "Shipped", "Delivered", "Cancelled", "Refunded"];
 
 const TransactionManagement = () => {
-  const server = import.meta.env.VITE_SERVER
-  const [order, setOrder] = useState({
-    name: "Puma Shoes",
-    address: "77 black street",
-    city: "New York",
-    state: "Nevada",
-    country: "US",
-    pinCode: 242433,
-    status: "Processing",
-    subtotal: 4000,
-    discount: 1200,
-    shippingCharges: 0,
-    tax: 200,
-    total: 4000 + 200 + 0 - 1200,
-    orderItems,
-  });
-
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { order } = location.state || {};
+  const [orderData, setOrderData] = useState(order || {});
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState(order.status);
+  const [selectedStatus, setSelectedStatus] = useState(orderData?.status[orderData.status.length - 1]?.status || "Processing");
+
+  const server = import.meta.env.VITE_SERVER;
+
+  useEffect(() => {
+    if (order) {
+      setOrderData(order);
+      setSelectedStatus(order?.status[order.status.length - 1]?.status || "Processing");
+    }
+  }, [order]);
 
   const handleStatusChange = (status) => {
     setSelectedStatus(status);
-    setOrder((prev) => ({
+    const updatedStatuses = [...orderData.status, { status, date: new Date().toISOString() }];
+    setOrderData((prev) => ({
       ...prev,
-      status,
+      status: updatedStatuses,
     }));
     setShowStatusDropdown(false); // Hide dropdown after selection
   };
@@ -54,80 +41,73 @@ const TransactionManagement = () => {
   };
 
   const updateOrder = async () => {
-    try {
-      const response = await fetch(`${server}/orders/${order.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(order),
-      });
-      if (response.ok) {
-        const updatedOrder = await response.json();
-        setOrder(updatedOrder.data); // Update state with the updated order
-        alert('Order updated successfully');
+      const encryptedData = encryptData(JSON.stringify({id: orderData._id, status: selectedStatus }));
+      const response = await axios.put(`${server}/order`, { encryptedData });
+      console.log(response.data.success);
+      if (response.data.success) {
+        toast.success("Order updated successfully");
+        navigate("/admin/transaction");  
       } else {
-        throw new Error('Failed to update order');
+        throw new Error("Failed to update order");
       }
-    } catch (error) {
-      console.error('Error updating order:', error);
-      alert('Error updating order');
-    }
+
   };
+
+  if (!order) {
+    return <p>Order data not found.</p>;
+  }
 
   return (
     <div className="admin-container">
       <AdminSidebar />
       <main className="product-management">
-        <section
-          style={{
-            padding: "2rem",
-          }}
-        >
-          <h2>Order Items</h2>
-
-          {orderItems.map((i) => (
+        <section style={{ padding: "2rem" }}>
+          <h2> {orderData.order_number}</h2>
+          {orderData.items.map((item) => (
             <ProductCard
-              key={i.id}
-              name={i.name}
-              photo={`${i.photo}`}
-              productId={i.id}
-              quantity={i.quantity}
-              price={i.price}
+              key={item._id}
+              name={ item.product.name }
+              photo={ `${server}/${item.product.images[0].url}`}
+              productId={item.product}
+              quantity={typeof item.quantity === "number" ? item.quantity : 0}
+              price={typeof item.price === "number" ? item.price : 0}
             />
           ))}
         </section>
 
         <article className="shipping-info-card">
-          <button className="product-delete-btn" onClick={() => setOrder((prev) => ({ ...prev, status: "Cancelled" }))}>
+          <button className="product-delete-btn" onClick={() => handleStatusChange("Cancelled")}>
             <FaTrash />
           </button>
           <h1>Order Info</h1>
           <h5>User Info</h5>
-          <p>Name: {order.name}</p>
+          <p>Name: {orderData.shipping_address.name} </p>
+          <p>Mobile: {orderData.shipping_address.phoneNumber}</p>
+          {orderData.shipping_address.alternatePhoneNumber && <p>Alternate Mobile: {orderData.shipping_address.alternatePhoneNumber}</p>}
           <p>
-            Address: {`${order.address}, ${order.city}, ${order.state}, ${order.country} ${order.pinCode}`}
+            Address: {`${orderData.shipping_address.address_line1}, ${orderData.shipping_address.city}, ${orderData.shipping_address.state}, ${orderData.shipping_address.country} ${orderData.shipping_address.pinCode}`}
           </p>
+
           <h5>Amount Info</h5>
-          <p>Subtotal: ₹{order.subtotal}</p>
-          <p>Shipping Charges: ₹{order.shippingCharges}</p>
-          <p>Tax: ₹{order.tax}</p>
-          <p>Discount: ₹{order.discount}</p>
-          <p>Total: ₹{order.total}</p>
+          <p>Subtotal: ₹{orderData.subtotal}</p>
+          <p>Shipping Charges: ₹{orderData.shippingCharges}</p>
+          <p>Tax: ₹{orderData.tax}</p>
+          <p>Discount: ₹{orderData.discount}</p>
+          <p>Total: ₹{orderData.total_amount}</p>
 
           <h5>Status Info</h5>
           <p>
             Status:{" "}
             <span
               className={
-                order.status === "Delivered"
+                selectedStatus === "Delivered"
                   ? "purple"
-                  : order.status === "Shipped"
+                  : selectedStatus === "Shipped"
                   ? "green"
                   : "red"
               }
             >
-              {order.status}
+              {selectedStatus}
             </span>
           </p>
 
@@ -138,11 +118,7 @@ const TransactionManagement = () => {
           {showStatusDropdown && (
             <div className="status-dropdown">
               {statusOptions.map((status) => (
-                <div
-                  key={status}
-                  className="status-option"
-                  onClick={() => handleStatusChange(status)}
-                >
+                <div key={status} className="status-option" onClick={() => handleStatusChange(status)}>
                   {status}
                 </div>
               ))}
@@ -158,13 +134,7 @@ const TransactionManagement = () => {
   );
 };
 
-const ProductCard = ({
-  name,
-  photo,
-  price,
-  quantity,
-  productId,
-}) => (
+const ProductCard = ({ name, photo, price, quantity, productId }) => (
   <div className="transaction-product-card">
     <img src={photo} alt={name} />
     <Link to={`/product/${productId}`}>{name}</Link>

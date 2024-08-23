@@ -5,13 +5,44 @@ import { DoughnutChart, PieChart } from "../../../components/admin/Charts";
 import data from "../../../assets/data.json";
 
 
+const colors = [
+  // Light Colors
+  "#F5F5F5", // White Smoke
+  "#FAFAD2", // Light Goldenrod Yellow
+  "#FFE4E1", // Misty Rose
+  "#FFF0F5", // Lavender Blush
+  "#E6E6FA", // Lavender
+  "#F0FFF0", // Honeydew
+  "#F0F8FF", // Alice Blue
+  "#E0FFFF", // Light Cyan
+  "#F5FFFA", // Mint Cream
+  "#F5F5DC", // Beige
+  "#F0E68C", // Khaki
+  "#FFFAF0", // Floral White
+  "#FAEBD7", // Antique White
+  "#FDF5E6", // Old Lace
+  "#FFFACD", // Lemon Chiffon
+  "#E8E8E8", // Light Grey
+  "#D3D3D3", // Light Gray
+  "#B0E0E6", // Powder Blue
+  "#D3F8E2", // Honeydew
+
+  // Slightly Darker Colors
+  "#D0E0E3", // Light Steel Blue
+  "#BFD3C1", // Light Olive Green
+  "#B5B5B5", // Medium Gray
+  "#BCC6CC", // Light Blue Gray
+  "#B4A6A6", // Light Taupe
+  "#A3B1B8", // Pale Grayish Blue
+  "#9DA3A3", // Pale Grayish Green
+  "#D4A5A5", // Light Rose
+  "#A2B9B1", // Light Sea Green
+  "#C1D3FC"  // Light Periwinkle
+];
+
 const getRandomColor = () => {
-  const letters = '0123456789ABCDEF';
-  let color = '#';
-  for (let i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-  return color;
+  const randomIndex = Math.floor(Math.random() * colors.length);
+  return colors[randomIndex];
 };
 const PieCharts = () => {
   const [orderLabels, setOrderLabels] = useState([]);

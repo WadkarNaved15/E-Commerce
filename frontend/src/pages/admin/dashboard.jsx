@@ -12,17 +12,13 @@ import { useEffect, useState ,useRef } from "react";
 import apiClient from "../../utils/apiClient";
 import "../../styles/admin-styles/dashboard.css";
 
-const userImg =
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSJxA5cTf-5dh5Eusm0puHbvAhOrCRPtckzjA&usqp";
+const months = ["Jan", "Feb", "March", "April", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec"];
 
-import data from "../../assets/data.json";
-import axios from "axios";
 
 const Dashboard = () => {
   const server = import.meta.env.VITE_SERVER
   const [category, setCategory] = useState([]);
   const [stats, setStats] = useState({});
-  const [months, setMonths] = useState([]);
   const [revenue, setRevenue] = useState([]);
   const [expense, setExpense] = useState([]);
 
@@ -43,7 +39,6 @@ const Dashboard = () => {
         const response = await apiClient.get("/stats/dashboard-stats");
         if (response.data.success) {
           setStats(response.data.stats);
-          setMonths(response.data.stats.revenue.map((revenue) => revenue.month));
           setRevenue(response.data.stats.revenue.map((revenue) => revenue.revenue));
           setExpense(response.data.stats.expenses.map((expense) => expense.expense));
         }
